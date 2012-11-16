@@ -1,0 +1,5 @@
+#!/bin/bash
+# will disable eth0
+sudo wicd
+sudo wicd-client -n &
+

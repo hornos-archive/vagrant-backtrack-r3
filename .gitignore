@@ -1,0 +1,7 @@
+.rake_test_cache
+*.pem
+*.key
+*.pub
+data_bags/users/*
+.vagrant
+Spicefile

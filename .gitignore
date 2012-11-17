@@ -2,6 +2,7 @@
 *.pem
 *.key
 *.pub
+*rsa
 data_bags/users/*
 .vagrant
 Spicefile

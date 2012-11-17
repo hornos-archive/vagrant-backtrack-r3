@@ -9,13 +9,5 @@ if test -r ${identity} ; then
   opt="-i ${identity}"
 fi
 
-function login/copy() {
-  if test -z "$*" ; then
-    $copy wifi
-    $copy wlanup
-  fi
-}
+scp ${opt} $* ${user}@${host_only}:/home/${user}
 
-# login/copy $*
-
-ssh ${opt} -X ${user}@${host_only} $*

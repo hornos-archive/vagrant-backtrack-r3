@@ -1,0 +1,4 @@
+For this setup you need:
+
+* Backtrack in a VirtualBox with vagrant (use vagrant to provision)
+* Long range USB wifi adapter (set VB USB filter)

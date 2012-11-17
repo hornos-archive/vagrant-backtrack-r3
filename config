@@ -1,0 +1,4 @@
+host_only=192.168.33.33
+identity=id_rsa
+user=vagrant
+copy=./copy

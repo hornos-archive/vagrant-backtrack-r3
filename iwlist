@@ -1,0 +1,5 @@
+#!/bin/bash
+wif=${1:-wlan0}
+cmd=${2:-scan}
+
+sudo iwlist ${wif} ${cmd}

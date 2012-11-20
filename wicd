@@ -1,0 +1,67 @@
+#!/bin/bash
+# will disable vagrant's eth0
+# /vagrant and VB sharing seems to work
+
+wicd_pid=/var/run/wicd/wicd.pid
+wicd_conf=/etc/wicd/wireless-settings.conf
+
+function wicd/running() {
+  if test -r "${wicd_pid}" ; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function wicd/server() {
+  local _cmd=${1:-start}
+
+  case ${_cmd} in
+    start)
+      if ! wicd/running ; then echo "Starting wicd..."; sudo wicd; fi
+    ;;
+    stop)
+      if wicd/running ; then
+        echo "Stopping wicd..."
+        sudo kill -9 $(cat ${wicd_pid})
+        sudo rm ${wicd_pid}
+      fi
+    ;;
+    restart)
+      wicd/server stop
+      sleep 2
+      wicd/server start
+    ;;
+  esac
+}
+
+function wicd/client() {
+  sudo wicd-client -n
+}
+
+function wicd/clean() {
+  if sudo test -r ${wicd_conf} ; then
+    echo "Cleaning..."
+    cat /dev/null | sudo tee ${wicd_conf}
+  fi
+}
+
+_cmd=${1}
+shift
+case ${_cmd} in
+  server)
+    wicd/server $*
+  ;;
+  client)
+    wicd/client $*
+  ;;
+  clean)
+    wicd/clean
+  ;;
+  *)
+    # wicd/clean
+    wicd/server
+    wicd/client
+    wicd/clean
+  ;;
+esac

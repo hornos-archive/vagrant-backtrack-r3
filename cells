@@ -1,0 +1,13 @@
+#!/bin/bash
+
+v/iwlist | \
+awk '{
+  if(match($0,"Cell") ) {
+    split($0,a," ");
+    printf("\n%s: %s\n","BSSID",$5)
+  };
+  if(match($0,"ESSID")||match($0,"WPA")||match($0,"WEP")) {
+    sub(/^[ \t]+/, "");
+    printf("  %s\n",$0);
+  }
+}'

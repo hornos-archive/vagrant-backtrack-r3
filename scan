@@ -1,0 +1,8 @@
+#!/bin/bash
+opt="--wireless"
+if ! test -z "$*" ; then
+  sudo wicd-cli ${opt} $*
+  exit $?
+fi
+sudo wicd-cli ${opt} -S
+sudo wicd-cli ${opt} -l

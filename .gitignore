@@ -1,8 +1,8 @@
 .rake_test_cache
 *.pem
 *.key
-*.pub
-*rsa
+# *.pub
+# *rsa
 data_bags/users/*
 .vagrant
 Spicefile

@@ -1,0 +1,3 @@
+#!/bin/bash
+
+sudo cat /opt/metasploit/config/database.yml

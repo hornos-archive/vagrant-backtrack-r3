@@ -1,4 +1,13 @@
+### global configuration
+
 host_only=192.168.33.33
 identity=id_rsa
 user=vagrant
 copy=./copy
+
+### wifi
+
+# outbound
+wif_green=wlan0
+# inbound
+wif_red=wlan1

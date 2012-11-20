@@ -1,0 +1,9 @@
+#!/bin/bash
+wif=${1:-wlan0}
+
+ifconfig $wif &>/dev/null
+if test $? -eq 0 ; then
+  sudo ifconfig $wif down
+fi
+sudo macchanger -r $wif
+sudo ifconfig $wif up

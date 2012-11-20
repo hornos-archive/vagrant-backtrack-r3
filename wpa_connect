@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# http://linux.icydog.net/wpa.php
+
+_conf=wpa_connect.conf.$$
+_wdrv=wext
+# green line
+_wif=wlan0
+
+function wpa_connect/connect() {
+  # interactive
+  v/scan
+
+  echo ""
+  read    -p "ESSID: " bssid
+  read -s -p "     > " passw
+
+  wpa_passphrase "${bssid}" "${passw}" > "${_conf}"
+  sudo wpa_supplicant -D${_wdrv} -i${_wif} -c${_conf}
+
+  sudo rm ${_conf}
+}
+
+_cmd=$1
+shift
+
+case ${_cmd} in
+  dhcp)
+    sudo dhclient ${_wif}
+    ifconfig ${_wif}
+    route -n
+  ;;
+  ifconfig)
+    curl -s ifconfig.me/all.json | \
+    v/prettify_json.rb
+  ;;
+  *)
+    wpa_connect/connect $*
+  ;;
+esac

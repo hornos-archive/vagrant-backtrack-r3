@@ -6,9 +6,15 @@ For this setup you need:
 /opt/metasploit/config/database.yml
 
 
-# Usage
+# Wifi Usage
+
+    v/wifup
+    v/cells
 
     ln -s /vagrant $HOME/v
     v/wpa_connect
+    CTRL + Z
+    bg
     v/wpa_connect dhcp
+    fg
 

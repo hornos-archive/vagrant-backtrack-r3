@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Metasploit pp 21
+
+_cmd=${1}
+case ${_cmd} in
+  fast|ping)
+    shift
+  ;;
+  *)
+    _cmd=full
+  ;;
+esac
+
+wif=${1:-wlan0}
+net=$(ip -o -4 addr show ${wif} | \
+      awk '{print $4}')
+ip=${2:-${net%%/*}}
+
+nmap_opt="--exclude ${ip}"
+
+echo "Scanning: ${_cmd}/${net}"
+case ${_cmd} in
+  ping)
+    sudo nmap -sP ${net} ${nmap_opt}
+  ;;
+  fast)
+    sudo nmap -Pn -sS ${net} ${nmap_opt}
+  ;;
+  *)
+    sudo nmap -Pn -sS -A -oX ${wif}.xml ${net} ${nmap_opt}
+  ;;
+esac

@@ -1,0 +1,4 @@
+DataDirectory ""
+SocksPort 8051
+ControlPort 8052
+DNSPort 8053

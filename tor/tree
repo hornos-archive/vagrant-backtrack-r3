@@ -1,0 +1,141 @@
+#!/bin/bash
+
+# creates a tor tree
+# edit header for common options
+
+# compile delegated
+# ftp://ftp.delegate.org/pub/DeleGate/
+# http://blog.databigbang.com/running-your-own-anonymous-rotating-proxies/
+# https://gist.github.com/2519840
+
+# Usage
+# ./tree init N
+# ./tree start
+# ./tree stop
+
+### vars
+# base address
+_socks=33001
+_pre="CH"
+_host=localhost
+
+function tree/control() {
+  echo $((${1:-${_socks}}+1))
+}
+
+function tree/dns() {
+  echo $((${1:-${_socks}}+2))
+}
+
+function tree/http() {
+  echo $((${1:-${_socks}}+3))
+}
+
+### func
+function tree/init() {
+  local i=${1:-1}
+  i=$(printf "%02d\n" ${i})
+  local _dir="./${_pre}${i}"
+  if test -d "${_dir}"; then
+    return
+  fi
+
+  mkdir "${_dir}"
+  local _path=$(cd ${_dir};pwd)
+  tree/torrc "${_path}"
+  tree/torsocks "${_path}"
+  tree/config "${_path}"
+  chmod -R go-rwx "${_dir}"
+}
+
+function tree/torrc() {
+  local _rc="${1}/torrc"
+  # no password: since it is exclusive
+  cp header "${_rc}"
+  cat >> "${_rc}" << EOF
+SocksPort ${_socks}
+ControlPort ${_control}
+DNSPort ${_dns}
+DataDirectory ${_path}
+PidFile ${_path}/pid
+EOF
+}
+
+function tree/torsocks() {
+  local _rc="${1}/torsocks"
+  cat >> "${_rc}" << EOF
+server = 127.0.0.1
+server_port = ${_socks}
+server_type = 5
+tordns_enable = true
+EOF
+}
+
+function tree/config() {
+  local _rc="${1}/config"
+  cat >> "${_rc}" << EOF
+mid_tor_listen=${_socks}
+mid_tor_control=${_control}
+mid_tor_dns=${_dns}
+mid_tor_http=${_http}
+mid_tor_host=${_host} 
+EOF
+}
+
+function tree/pkill() {
+  local _pid="${1}/pid"
+  if test -r "${_pid}" ; then kill $(cat "${_pid}"); fi
+}
+
+function tree/skill() {
+  local _ch="${1}"
+  local _pid=$(screen -ls | \
+               grep $(basename ${_ch}) | \
+               awk '{split($1,a,"."); print a[1]}')
+  if ! test -z ${_pid}; then kill ${_pid}; fi
+}
+
+### arg
+_cmd=${1:-init}
+
+_control=$(tree/control)
+_dns=$(tree/dns)
+_http=$(tree/http)
+
+### main
+case ${_cmd} in
+  init)
+    shift
+    _l=${1:-3}
+    for ((i=1;i<=${_l};++i)); do
+      tree/init ${i}
+      _socks=$((_socks+4))
+      _control=$(tree/control)
+      _dns=$(tree/dns)
+      _http=$(tree/http)
+    done
+  ;;
+  start)
+    shift
+    for i in ${_pre}* ; do
+      if ! test -d ${i} ; then continue; fi
+
+      echo "Starting ${i}..."
+      # tor in bg, delegated fg
+      screen -t ${i} -S ${i} -d -m ./torgate ${i}
+    done
+  ;;
+  stop)
+    shift
+    for i in ${_pre}* ; do
+      if ! test -d ${i} ; then continue; fi
+
+      echo "Stopping ${i}..."
+      tree/pkill ${i}
+      if test -r ${i}/torgate.pid; then
+        kill $(cat ${i}/torgate.pid)
+      fi
+      # tree/skill ${i}
+    done
+  ;;
+esac

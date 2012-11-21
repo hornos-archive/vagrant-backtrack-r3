@@ -1,0 +1,22 @@
+#!/bin/bash
+_vagrant=./.vagrant
+_vbm=VBoxManage
+
+function vmctl/uuid() {
+  cat ${_vagrant} | \
+  sed s/[^a-z0-9-]/\ /g | \
+  awk '{print $3}'
+}
+
+_cmd=${1}
+shift
+
+_uuid=$(vmctl/uuid)
+if test -z "${_uuid}" ; then
+  exit 1
+fi
+
+case ${_cmd} in
+  pause|resume)
+    ${_vbm} controlvm ${_uuid} ${_cmd}
+esac

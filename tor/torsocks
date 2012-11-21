@@ -1,0 +1,4 @@
+server = 127.0.0.1
+server_port = 8051
+server_type = 5
+tordns_enable = true

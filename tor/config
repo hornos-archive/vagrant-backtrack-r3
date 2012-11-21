@@ -1,0 +1,3 @@
+mid_tor_listen=8051
+mid_tor_control=8052
+mid_tor_dns=8053

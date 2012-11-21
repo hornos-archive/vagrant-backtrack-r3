@@ -1,0 +1,8 @@
+# SocksBindAddress 127.0.0.1 # accept connections only from localhost
+# AllowUnverifiedNodes middle,rendezvous
+# Log notice syslog
+RunAsDaemon 1
+# CircuitBuildTimeout 30
+# NumEntryGuards 6
+# KeepalivePeriod 60
+NewCircuitPeriod 15

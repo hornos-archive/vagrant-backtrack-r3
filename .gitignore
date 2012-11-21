@@ -2,7 +2,8 @@
 *.pem
 *.key
 # *.pub
-# *rsa
+# *rsa
 data_bags/users/*
 .vagrant
 Spicefile
+tor/CH*

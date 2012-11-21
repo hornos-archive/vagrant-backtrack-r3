@@ -1,0 +1,6 @@
+#!/bin/bash
+_ch=${1:-CH01}
+_pty=$(screen -ls | \
+       grep $(basename ${_ch}) | \
+       awk '{print $1}')
+screen -r ${_pty}

@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# https://exain.wordpress.com/2011/03/31/making-a-wifi-hotspot-access-point-using-linux-wifi-lan-cardusb-adapter/
+
+_conf=ap.conf.$$
+hostapd=/usr/sbin/hostapd
+
+# driver=nl80211
+
+function ap/config() {
+  cat > ${_conf} <<EOF
+interface=${1:-${inb}}
+driver=nl80211
+ssid=${essid}
+hw_mode=g
+channel=11
+wpa=3
+wpa_passphrase=${passw}
+wpa_key_mgmt=WPA-PSK
+wpa_pairwise=TKIP CCMP
+wpa_ptk_rekey=600
+EOF
+}
+
+function ap/ipmasq() {
+  # ! interface
+  echo "1" | sudo tee /proc/sys/net/ipv4/ip_forward
+  sudo iptables -t nat -A POSTROUTING -o ${outb} -j MASQUERADE
+}
+
+
+### args
+_cmd=${1:-start}
+_wif=${2:-wlan1}
+essid=${3}
+
+### main
+if test -z "${essid}" ; then
+  read    -p "ESSID: " essid
+else
+  echo "ESSID: ${essid}"
+fi
+read -s -p "     > " passw
+
+v/wifup ${_wif}
+sleep 1
+
+# sudo iwconfig ${_wif} mode master
+sudo ifconfig ${_wif} 10.1.1.1 netmask 255.255.255.0 
+
+ap/config ${_wif}
+echo ""
+echo ""
+sudo ${hostapd} -dd ${_conf}
+
+rm ${_conf}

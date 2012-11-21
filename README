@@ -5,16 +5,19 @@ For this setup you need:
 
 /opt/metasploit/config/database.yml
 
+# Setup
+  ln -s /vagrant $HOME/v
 
 # Wifi Usage
+* Connect devices: left, right
+  v/wifup
+  v/cells
 
-    v/wifup
-    v/cells
+* Connect the network:
+  v/wpa
+  ctrl + z
+  bg; v/wpa dhcp; fg
 
-    ln -s /vagrant $HOME/v
-    v/wpa_connect
-    CTRL + Z
-    bg
-    v/wpa_connect dhcp
-    fg
+* Start metasploit:
+  v/hermitage
 

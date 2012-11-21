@@ -1,0 +1,8 @@
+#!/bin/bash
+
+_bind=192.168.33.33
+_port=55553
+
+sudo su -l -c "msfrpcd -a ${_bind} -p ${_port} -f -U msf3 -P hermitage"
+
+

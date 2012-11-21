@@ -1,9 +1,14 @@
 #!/bin/bash
-wif=${1:-wlan0}
+wif=${*:-wlan0}
 
-ifconfig $wif &>/dev/null
-if test $? -eq 0 ; then
-  sudo ifconfig $wif down
-fi
-sudo macchanger -r $wif
-sudo ifconfig $wif up
+for if in ${wif} ; do
+  echo ""
+  echo "Configuring: $if"
+  ifconfig $if &>/dev/null
+  if test $? -eq 0 ; then
+    sudo ifconfig $if down
+  fi
+  sudo macchanger -r $if
+  sudo ifconfig $if up
+done
+

@@ -1,0 +1,23 @@
+#!/bin/bash
+
+_cmd=${1:-pop}
+
+case ${_cmd} in
+  pop)
+    route -n | \
+    grep ^0.0.0.0 | \
+    tee gw.dat
+    echo ""
+
+    _gw=$(cat gw.dat | awk '{print $2}')
+    if test -z "${_gw}" ; then exit 1; fi
+    echo "Delete default route via: ${_gw}"
+    sudo route del -net 0.0.0.0 gw ${_gw}
+  ;;
+  push)
+    if ! test -r gw.dat ; then exit 1; fi
+    _gw=$(cat gw.dat | awk '{print $2}')
+    echo "Restore default route via: ${_gw}"
+    sudo route add -net 0.0.0.0 gw ${_gw}
+  ;;
+esac

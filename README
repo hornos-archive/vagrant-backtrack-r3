@@ -9,15 +9,24 @@ For this setup you need:
   ln -s /vagrant $HOME/v
 
 # Wifi Usage
-* Connect devices: left, right
-  v/wifup
+  v/wifup [wlan0 wlan1]
+  connect devices
+
   v/cells
+  select target network
 
 * Connect the network:
+  v/gw
+  save old default route
+
   v/wpa
   ctrl + z
   bg; v/wpa dhcp; fg
+  v/wpa me
+  check your identity
+
+  v/gw push
+  load old default route
 
 * Start metasploit:
   v/hermitage
-

@@ -15,7 +15,8 @@ function wpa/connect() {
   while test "${bssid}" = "" ; do
     echo ""
     echo "Scanning..."
-    v/scan
+    # v/scan
+    v/cells
     echo ""
     read    -p "ESSID: " bssid
     if test "${bssid}" = "" ; then
@@ -46,7 +47,7 @@ case ${_cmd} in
   dhcp)
     wpa/dhcp
   ;;
-  ifconfig)
+  me)
     curl -s ifconfig.me/all.json | \
     v/prettify_json.rb
   ;;

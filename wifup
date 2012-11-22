@@ -1,9 +1,23 @@
 #!/bin/bash
 wif=${*:-wlan0}
 
+function wifup/wait() {
+  local _if=${1}
+  while true; do
+    iwconfig ${_if} &>/dev/null
+    if test $? -eq 0 ; then
+      return
+    fi
+    local _d=$(date +"%Y-%m-%d %H:%M:%S")
+    echo "${_d} Connect device: ${_if} !"
+    sleep 3
+  done
+}
+
 for if in ${wif} ; do
+  wifup/wait ${if}
   echo ""
-  echo "Configuring: $if"
+  echo "Configuring: $if..."
   ifconfig $if &>/dev/null
   if test $? -eq 0 ; then
     sudo ifconfig $if down
@@ -11,4 +25,3 @@ for if in ${wif} ; do
   sudo macchanger -r $if
   sudo ifconfig $if up
 done
-

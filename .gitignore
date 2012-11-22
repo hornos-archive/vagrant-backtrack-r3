@@ -7,3 +7,4 @@ data_bags/users/*
 .vagrant
 Spicefile
 tor/CH*
+*.dat

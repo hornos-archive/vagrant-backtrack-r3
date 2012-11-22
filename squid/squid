@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo squid -N -f ./squid.conf
+

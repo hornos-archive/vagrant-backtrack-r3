@@ -10,4 +10,6 @@ awk '{
     sub(/^[ \t]+/, "");
     printf("  %s\n",$0);
   }
-}'
+}' | \
+tee cells.dat
+

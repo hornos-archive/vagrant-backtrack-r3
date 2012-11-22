@@ -21,5 +21,5 @@ trap torgate/exit EXIT
 source config
 tor -f ${PWD}/torrc
 # TODO: SOCKS port check on not exists? abort
-delegated -S -Tx -fv -P${mid_tor_host}:${mid_tor_http} SERVER=http SOCKS=localhost:${mid_tor_listen}
-# read
+delegated -S -Tx -fv -P${mid_tor_host}:${mid_tor_http} SERVER=http SOCKS=${mid_tor_host}:${mid_tor_listen}
+read

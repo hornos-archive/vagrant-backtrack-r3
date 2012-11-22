@@ -1,0 +1,32 @@
+http://www.techhomethebacon.com/how-to/how-to-install-tor-on-backtrack-5r3.html
+
+1. Add this line to your /etc/apt/sources.list file:
+deb http://deb.torproject.org/torproject.org lucid main
+
+2. Run these next two commands
+gpg --keyserver keys.gnupg.net --recv 886DDD89
+gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
+
+3. Refresh your sources
+apt-get update
+
+4. Add to keyring
+apt-get install deb.torproject.org-keyring
+
+5. Install Tor:
+apt-get install tor
+
+6. Install Vidalia (GUI for Tor)
+apt-get install vidalia deb.torproject.org-keyring
+
+7. Install Privoxy
+apt-get install privoxy
+vim /etc/privoxy/config (uncomment line 1257) VIM Command Go To Line: 1257+G
+
+8. Stop Privoxy
+kill -9 (privoxy pid) 
+
+9. Start Privoxy
+/usr/sbin/privoxy --pidfile /var/run/privoxy.pid âuser privoxy /etc/privoxy/config
+
+10. Firefox Settings: HTTP Proxy: 127.0.0.1 Port 8118 â Use this proxy server for all protocols

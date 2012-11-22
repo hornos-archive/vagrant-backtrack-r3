@@ -8,6 +8,8 @@
 # http://blog.databigbang.com/running-your-own-anonymous-rotating-proxies/
 # https://gist.github.com/2519840
 
+# TODO: privoxy linux
+
 # Usage
 # ./tree init N
 # ./tree start
@@ -17,7 +19,7 @@
 # base address
 _socks=33001
 _pre="CH"
-_host=localhost
+_host=127.0.0.1
 
 function tree/control() {
   echo $((${1:-${_socks}}+1))
@@ -122,7 +124,9 @@ case ${_cmd} in
 
       echo "Starting ${i}..."
       # tor in bg, delegated fg
-      screen -t ${i} -S ${i} -d -m ./torgate ${i}
+      _opt="-d"
+      _opt=""
+      screen -t ${i} -S ${i} ${_opt} -m ./torgate ${i}
     done
   ;;
   stop)

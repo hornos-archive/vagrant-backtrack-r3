@@ -1,0 +1,4 @@
+use auxiliary/scanner/ftp/ftp_version
+set RHOSTS 192.168.33.0/24
+set THREADS 33
+run

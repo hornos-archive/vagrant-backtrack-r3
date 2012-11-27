@@ -3,9 +3,13 @@
 # https://exain.wordpress.com/2011/03/31/making-a-wifi-hotspot-access-point-using-linux-wifi-lan-cardusb-adapter/
 
 _conf=ap.conf.$$
-hostapd=/usr/sbin/hostapd
+hostapd=$HOME/bin/hostapd
 
-# driver=nl80211
+function ap/genpw() {
+  local l=${1:-21}
+  [ "$l" == "" ] && l=16
+  tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
+}
 
 function ap/config() {
   cat > ${_conf} <<EOF
@@ -40,7 +44,10 @@ if test -z "${essid}" ; then
 else
   echo "ESSID: ${essid}"
 fi
-read -s -p "     > " passw
+# read -s -p "     > " passw
+passw=$(ap/genpw)
+echo "     > $passw"
+read
 
 v/wifup ${_wif}
 sleep 1

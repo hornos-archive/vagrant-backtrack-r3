@@ -1,0 +1,5 @@
+use auxiliary/scanner/smb/smb_login
+set RHOSTS 192.168.33.66
+set SMBUser admin
+# set SMBPass
+run

@@ -1,0 +1,6 @@
+#!/bin/bash
+trap "rm $$.msg" EXIT
+read -p "Message: " msg
+echo "${msg}" > $$.msg
+# linux ? nc
+netcat -lvn -p 12345 < $$.msg

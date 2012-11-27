@@ -1,25 +1,34 @@
 #!/bin/bash
 
-# creates a tor tree
-# edit header for common options
+# tree creates multiply tor configurations (channels)
 
-# compile delegated
+# Prerequisite:
 # ftp://ftp.delegate.org/pub/DeleGate/
+
+# Based on:
 # http://blog.databigbang.com/running-your-own-anonymous-rotating-proxies/
 # https://gist.github.com/2519840
 
-# TODO: privoxy linux
 
-# Usage
+# General usage:
+# create N channels
 # ./tree init N
+
+# start all the channels
 # ./tree start
+
+# stop all the channels
 # ./tree stop
 
-### vars
+# Configuration
+# TODO: read config
 # base address
 _socks=33001
+# channel prefix
 _pre="CH"
-_host=127.0.0.1
+# listen host
+_host="localhost"
+_proxy="192.168.33.33"
 
 function tree/control() {
   echo $((${1:-${_socks}}+1))
@@ -33,14 +42,12 @@ function tree/http() {
   echo $((${1:-${_socks}}+3))
 }
 
-### func
 function tree/init() {
   local i=${1:-1}
   i=$(printf "%02d\n" ${i})
   local _dir="./${_pre}${i}"
-  if test -d "${_dir}"; then
-    return
-  fi
+
+  if test -d "${_dir}"; then return; fi
 
   mkdir "${_dir}"
   local _path=$(cd ${_dir};pwd)
@@ -54,7 +61,7 @@ function tree/torrc() {
   local _rc="${1}/torrc"
   # no password: since it is exclusive
   cp header "${_rc}"
-  cat >> "${_rc}" << EOF
+  cat > "${_rc}" << EOF
 SocksPort ${_socks}
 ControlPort ${_control}
 DNSPort ${_dns}
@@ -65,7 +72,7 @@ EOF
 
 function tree/torsocks() {
   local _rc="${1}/torsocks"
-  cat >> "${_rc}" << EOF
+  cat > "${_rc}" << EOF
 server = 127.0.0.1
 server_port = ${_socks}
 server_type = 5
@@ -75,13 +82,45 @@ EOF
 
 function tree/config() {
   local _rc="${1}/config"
-  cat >> "${_rc}" << EOF
+  cat > "${_rc}" << EOF
 mid_tor_listen=${_socks}
 mid_tor_control=${_control}
 mid_tor_dns=${_dns}
 mid_tor_http=${_http}
-mid_tor_host=${_host} 
+mid_tor_host=${_host}
 EOF
+}
+
+function tree/haproxy() {
+  local _rc="haproxy"
+  cat > "${_rc}" << EOF
+global
+# daemon
+ maxconn 256
+
+defaults
+ mode http
+ timeout connect 5000ms
+ timeout client 50000ms
+ timeout server 50000ms
+
+frontend rotor
+ bind ${_proxy}:33128
+ default_backend tors
+ option http_proxy
+
+backend tors
+ option http_proxy
+EOF
+
+  local i
+  for i in ${_pre}* ; do
+    if ! test -d ${i} ; then continue; fi
+    i=$(basename ${i})
+    source ${i}/config
+    echo " server ${i} ${mid_tor_host}:${mid_tor_http}" >> "${_rc}"
+  done
+  echo " balance roundrobin" >> "${_rc}"
 }
 
 function tree/pkill() {
@@ -141,5 +180,9 @@ case ${_cmd} in
       fi
       # tree/skill ${i}
     done
+  ;;
+  haproxy)
+    shift
+    tree/haproxy $*
   ;;
 esac

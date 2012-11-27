@@ -1,32 +1,30 @@
 http://www.techhomethebacon.com/how-to/how-to-install-tor-on-backtrack-5r3.html
 
-1. Add this line to your /etc/apt/sources.list file:
-deb http://deb.torproject.org/torproject.org lucid main
+echo "deb http://deb.torproject.org/torproject.org lucid main" | \
+sudo tee -a /etc/apt/sources.list
 
-2. Run these next two commands
 gpg --keyserver keys.gnupg.net --recv 886DDD89
 gpg --export A3C4F0F979CAA22CDBA8F512EE8CBC9E886DDD89 | sudo apt-key add -
-
-3. Refresh your sources
 apt-get update
-
-4. Add to keyring
 apt-get install deb.torproject.org-keyring
-
-5. Install Tor:
 apt-get install tor
 
-6. Install Vidalia (GUI for Tor)
 apt-get install vidalia deb.torproject.org-keyring
 
-7. Install Privoxy
 apt-get install privoxy
 vim /etc/privoxy/config (uncomment line 1257) VIM Command Go To Line: 1257+G
+kill -9 (privoxy pid)
+/usr/sbin/privoxy --pidfile /var/run/privoxy.pid user privoxy /etc/privoxy/config
 
-8. Stop Privoxy
-kill -9 (privoxy pid) 
+Firefox Settings:
+  HTTP Proxy: 127.0.0.1 Port 8118 Use this proxy server for all protocols
 
-9. Start Privoxy
-/usr/sbin/privoxy --pidfile /var/run/privoxy.pid âuser privoxy /etc/privoxy/config
+sudo apt-get install haproxy
 
-10. Firefox Settings: HTTP Proxy: 127.0.0.1 Port 8118 â Use this proxy server for all protocols
+Install Nexpose
+http://www.securitytube.net/video/5840
+
+apt-get install libstdc++5 xvfb xfonts-base xfonts-75dpi xserver-xorg libxtst6 libxp6
+
+http://www.rapid7.com/vulnerability-scanner.jsp
+

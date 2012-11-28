@@ -1,0 +1,10 @@
+#!/bin/bash
+_ch=${1:-CH01}
+
+if ! test -d "${_ch}" ; then
+  exit 1
+fi
+
+source ${_ch}/config
+
+arm -i ${mid_tor_control}

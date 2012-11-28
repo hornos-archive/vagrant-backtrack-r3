@@ -9,17 +9,6 @@
 # http://blog.databigbang.com/running-your-own-anonymous-rotating-proxies/
 # https://gist.github.com/2519840
 
-
-# General usage:
-# create N channels
-# ./tree init N
-
-# start all the channels
-# ./tree start
-
-# stop all the channels
-# ./tree stop
-
 # Configuration
 # TODO: read config
 # base address
@@ -66,7 +55,9 @@ SocksPort ${_socks}
 ControlPort ${_control}
 DNSPort ${_dns}
 DataDirectory ${_path}
-PidFile ${_path}/pid
+PidFile ${_path}/tor.pid
+# DisableAllSwap 1
+# RunAsDaemon 1
 EOF
 }
 
@@ -109,6 +100,13 @@ frontend rotor
  default_backend tors
  option http_proxy
 
+listen stats 192.168.33.33:38080
+ mode http
+ balance
+ stats uri /haproxy_stats
+ stats realm HAProxy\ Statistics
+ stats auth admin:haproxy
+
 backend tors
  option http_proxy
 EOF
@@ -121,10 +119,12 @@ EOF
     echo " server ${i} ${mid_tor_host}:${mid_tor_http}" >> "${_rc}"
   done
   echo " balance roundrobin" >> "${_rc}"
+
+  haproxy -db -V -p haproxy.pid -f "${_rc}"
 }
 
 function tree/pkill() {
-  local _pid="${1}/pid"
+  local _pid="${1}/tor.pid"
   if test -r "${_pid}" ; then kill $(cat "${_pid}"); fi
 }
 
@@ -143,8 +143,31 @@ _control=$(tree/control)
 _dns=$(tree/dns)
 _http=$(tree/http)
 
+function help/tree() {
+  cat << EOF
+  tree init N  - creates N channels
+  tree clean   - cleans all channels
+  tree start   - start channels in detached screens
+  tree stop    - stop channels
+  tree haproxy - starts haproxy rotor
+EOF
+  exit 1
+}
+
+
 ### main
 case ${_cmd} in
+  help)
+    help/tree
+  ;;
+  clean)
+    shift
+    for i in ${_pre}* ; do
+      if ! test -d ${i} ; then continue; fi
+
+      rm -Rv ./${i}
+    done
+  ;;
   init)
     shift
     _l=${1:-3}
@@ -155,25 +178,28 @@ case ${_cmd} in
       _dns=$(tree/dns)
       _http=$(tree/http)
     done
+    echo "${_l} channel(s) created. Plant the tree by ./tree start!"
   ;;
   start)
     shift
     for i in ${_pre}* ; do
       if ! test -d ${i} ; then continue; fi
 
-      echo "Starting ${i}..."
+      echo "Starting channel ${i}..."
       # tor in bg, delegated fg
       _opt="-d"
-      _opt=""
+      # _opt=""
       screen -t ${i} -S ${i} ${_opt} -m ./torgate ${i}
     done
+    echo "Pry the delegated channel by ./pry channel!"
+    echo "Arm the delegated channel by ./arm channel!"
   ;;
   stop)
     shift
     for i in ${_pre}* ; do
       if ! test -d ${i} ; then continue; fi
 
-      echo "Stopping ${i}..."
+      echo "Stopping channel ${i}..."
       tree/pkill ${i}
       if test -r ${i}/torgate.pid; then
         kill $(cat ${i}/torgate.pid)
@@ -183,6 +209,7 @@ case ${_cmd} in
   ;;
   haproxy)
     shift
+    echo "Starting haproxy rotor..."
     tree/haproxy $*
   ;;
 esac

@@ -13,7 +13,16 @@ frontend rotor
  default_backend tors
  option http_proxy
 
+listen stats 192.168.33.33:38080
+ mode http
+ balance
+ stats uri /haproxy_stats
+ stats realm HAProxy\ Statistics
+ stats auth admin:haproxy
+
 backend tors
  option http_proxy
  server CH01 localhost:33004
+ server CH02 localhost:33008
+ server CH03 localhost:33012
  balance roundrobin

@@ -1,6 +1,13 @@
 #!/bin/bash
 wif=${*:-wlan0}
 
+function wifup/genpw() {
+  local l=${1:-8}
+  [ "$l" == "" ] && l=16
+  tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
+}
+
+
 function wifup/wait() {
   local _if=${1}
   while true; do
@@ -24,4 +31,5 @@ for if in ${wif} ; do
   fi
   sudo macchanger -r $if
   sudo ifconfig $if up
+  sudo iwconfig nickname "$(wifup/genpw)"
 done

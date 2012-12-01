@@ -3,27 +3,20 @@
 cd ${1}
 
 torgate_pid="torgate.pid"
-delegate_pid="delegate.pid"
+privoxy_pid="privoxy.pid"
 
 echo $$ > ${torgate_pid}
 
 function torgate/exit() {
   source config
-  echo "Stopping delegated: ${mid_tor_host}:${mid_tor_http}..." > torgate.log
+  echo "Stopping privoxy..."
 
-# old method
-#  delegated -Fkill -P${mid_tor_host}:${mid_tor_http} > delegated.log
-#  _pid=$(cat delegated.log | \
-#         sed s/.*kill\(//  | \
-#         sed s/,.*//)
-
-  if test -r ${delegate_pid} ; then
-    local _pid=$(cat ${delegate_pid})
+  if test -r ${privoxy_pid} ; then
+    local _pid=$(cat ${privoxy_pid})
     if ! test -z "${_pid}" ; then kill ${_pid}; fi
   fi
-
   sleep 1
-  rm torgate.pid
+  rm ${torgate_pid}
   exit 1
 }
 trap torgate/exit EXIT
@@ -35,22 +28,9 @@ sleep 1
 echo "--------------------------------------------------------------------------"
 echo ""
 
-# http://www.delegate.org/delegate/Manual.htm
-# TODO: SOCKS port check on not exists? abort
-# TODO: delegated config
 
-delegate_opt="-S -Tx -fv -vt"
-
-proxy="${mid_tor_host}:${mid_tor_http}"
-socks="${mid_tor_host}:${mid_tor_listen}"
-server="http"
-
-echo "${server} delegate ${proxy} -> ${socks}"
-echo ""
-delegated ${delegated_opt} -P${proxy} \
-  SERVER=${server} \
-  SOCKS=${socks} \
-  PIDFILE=${PWD}/${delegate_pid} \
-  LOGFILE=${PWD}/delegate.log
-
+echo "${server} privoxy:"
+cat privoxy
+privoxy --pidfile "${PWD}/${privoxy_pid}" privoxy
+# TODO: screen
 read

@@ -43,6 +43,7 @@ function tree/init() {
   tree/torrc "${_path}"
   tree/torsocks "${_path}"
   tree/config "${_path}"
+  tree/privoxy "${_path}"
   chmod -R go-rwx "${_dir}"
 }
 
@@ -58,6 +59,16 @@ DataDirectory ${_path}
 PidFile ${_path}/tor.pid
 # DisableAllSwap 1
 # RunAsDaemon 1
+EOF
+}
+
+function tree/privoxy() {
+  local _rc="${1}/privoxy"
+  # no password: since it is exclusive
+  cat > "${_rc}" << EOF
+forward-socks5 / 127.0.0.1:${_socks} .
+listen-address 127.0.0.1:${_http}
+confdir /etc/privoxy
 EOF
 }
 
@@ -82,6 +93,8 @@ mid_tor_host=${_host}
 EOF
 }
 
+
+
 function tree/haproxy() {
   local _rc="haproxy"
   cat > "${_rc}" << EOF
@@ -103,7 +116,7 @@ frontend rotor
 listen stats 192.168.33.33:38080
  mode http
  balance
- stats uri /haproxy_stats
+ stats uri /haproxy
  stats realm HAProxy\ Statistics
  stats auth admin:haproxy
 
@@ -165,7 +178,7 @@ case ${_cmd} in
     for i in ${_pre}* ; do
       if ! test -d ${i} ; then continue; fi
 
-      rm -Rv ./${i}
+      echo "rm -Rv ./${i}"
     done
   ;;
   init)

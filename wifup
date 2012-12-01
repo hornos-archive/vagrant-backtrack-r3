@@ -31,5 +31,5 @@ for if in ${wif} ; do
   fi
   sudo macchanger -r $if
   sudo ifconfig $if up
-  sudo iwconfig nickname "$(wifup/genpw)"
+  # sudo iwconfig $if nickname "$(wifup/genpw)"
 done

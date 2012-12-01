@@ -16,7 +16,7 @@ frontend rotor
 listen stats 192.168.33.33:38080
  mode http
  balance
- stats uri /haproxy_stats
+ stats uri /haproxy
  stats realm HAProxy\ Statistics
  stats auth admin:haproxy
 
@@ -25,4 +25,14 @@ backend tors
  server CH01 localhost:33004
  server CH02 localhost:33008
  server CH03 localhost:33012
+ server CH04 localhost:33016
+ server CH05 localhost:33020
+ server CH06 localhost:33024
+ server CH07 localhost:33028
+ server CH08 localhost:33032
+ server CH09 localhost:33036
+ server CH10 localhost:33040
+ server CH11 localhost:33044
+ server CH12 localhost:33048
+ server CH13 localhost:33052
  balance roundrobin

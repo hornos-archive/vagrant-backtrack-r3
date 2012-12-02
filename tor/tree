@@ -40,10 +40,12 @@ function tree/init() {
 
   mkdir "${_dir}"
   local _path=$(cd ${_dir};pwd)
-  tree/torrc "${_path}"
+  tree/torrc    "${_path}"
   tree/torsocks "${_path}"
-  tree/config "${_path}"
-  tree/privoxy "${_path}"
+  tree/torsocks "${_path}" "192.168.33.33" ".ext"
+  tree/config   "${_path}"
+  tree/privoxy  "${_path}"
+  tree/polipo   "${_path}"
   chmod -R go-rwx "${_dir}"
 }
 
@@ -52,7 +54,8 @@ function tree/torrc() {
   # no password: since it is exclusive
   cp header "${_rc}"
   cat > "${_rc}" << EOF
-SocksPort ${_socks}
+SocksPort 127.0.0.1:${_socks}
+SocksPort 192.168.33.33:${_socks}
 ControlPort ${_control}
 DNSPort ${_dns}
 DataDirectory ${_path}
@@ -66,16 +69,35 @@ function tree/privoxy() {
   local _rc="${1}/privoxy"
   # no password: since it is exclusive
   cat > "${_rc}" << EOF
-forward-socks5 / 127.0.0.1:${_socks} .
+forward-socks4a / 127.0.0.1:${_socks} .
 listen-address 127.0.0.1:${_http}
+listen-address 192.168.33.33:${_http}
 confdir /etc/privoxy
 EOF
 }
 
-function tree/torsocks() {
-  local _rc="${1}/torsocks"
+function tree/polipo() {
+  local _rc="${1}/polipo"
   cat > "${_rc}" << EOF
-server = 127.0.0.1
+socksParentProxy = 127.0.0.1:${_socks}
+diskCacheRoot=""
+disableLocalInterface=true
+socksProxyType = socks5
+# censoredHeaders = from, accept-language, x-pad
+# censorReferer = maybe
+pidFile = "${1}/polipo.pid"
+proxyAddress = 127.0.0.1
+proxyPort = ${_http}
+# proxyAddress = 192.168.33.33
+# proxyPort = ${_http}
+EOF
+}
+
+function tree/torsocks() {
+  local _rc="${1}/torsocks${3}"
+  local _ip=${2:-127.0.0.1}
+  cat > "${_rc}" << EOF
+server = ${_ip}
 server_port = ${_socks}
 server_type = 5
 tordns_enable = true
@@ -104,9 +126,12 @@ global
 
 defaults
  mode http
- timeout connect 5000ms
- timeout client 50000ms
- timeout server 50000ms
+ timeout connect 500000ms
+ timeout client  500000ms
+ timeout server  500000ms
+ option dontlognull
+ retries 3
+ option redispatch
 
 frontend rotor
  bind ${_proxy}:33128
@@ -133,7 +158,7 @@ EOF
   done
   echo " balance roundrobin" >> "${_rc}"
 
-  haproxy -db -V -p haproxy.pid -f "${_rc}"
+  haproxy -db -V -d -p haproxy.pid -f "${_rc}"
 }
 
 function tree/pkill() {
@@ -178,7 +203,15 @@ case ${_cmd} in
     for i in ${_pre}* ; do
       if ! test -d ${i} ; then continue; fi
 
-      echo "rm -Rv ./${i}"
+      rm -Rv ./${i}
+    done
+  ;;
+  list)
+    shift
+    for i in ${_pre}* ; do
+      if ! test -d ${i} ; then continue; fi
+      cat ${i}/config
+      echo ""
     done
   ;;
   init)
@@ -204,8 +237,10 @@ case ${_cmd} in
       # _opt=""
       screen -t ${i} -S ${i} ${_opt} -m ./torgate ${i}
     done
-    echo "Pry the delegated channel by ./pry channel!"
-    echo "Arm the delegated channel by ./arm channel!"
+    echo "Pry the delegated channel by ./pry chan"
+    echo "Arm the delegated channel by ./arm chan"
+    echo ""
+    echo "Start haproxy rotor by ./tree haproxy"
   ;;
   stop)
     shift

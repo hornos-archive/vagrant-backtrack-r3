@@ -3,16 +3,16 @@
 cd ${1}
 
 torgate_pid="torgate.pid"
-polipo_pid="polipo.pid"
+privoxy_pid="privoxy.pid"
 
 echo $$ > ${torgate_pid}
 
 function torgate/exit() {
   source config
-  echo "Stopping polipo..."
+  echo "Stopping privoxy..."
 
-  if test -r ${polipo_pid} ; then
-    local _pid=$(cat ${polipo_pid})
+  if test -r ${privoxy_pid} ; then
+    local _pid=$(cat ${privoxy_pid})
     if ! test -z "${_pid}" ; then kill ${_pid}; fi
   fi
   sleep 1
@@ -29,8 +29,8 @@ echo "--------------------------------------------------------------------------
 echo ""
 
 
-echo "${server} polipo:"
-cat polipo
-polipo -c polipo
+echo "${server} privoxy:"
+cat privoxy
+privoxy --pidfile "${PWD}/${privoxy_pid}" privoxy
 # TODO: screen
 read

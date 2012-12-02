@@ -1,0 +1,4 @@
+# http://blog.gnu-designs.com/squid-privoxy-tor/
+
+forward-socks4a / 127.0.0.1:8051 .
+listen-address 127.0.0.1:8118

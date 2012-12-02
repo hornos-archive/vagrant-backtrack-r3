@@ -4,9 +4,12 @@ global
 
 defaults
  mode http
- timeout connect 5000ms
- timeout client 50000ms
- timeout server 50000ms
+ timeout connect 500000ms
+ timeout client  500000ms
+ timeout server  500000ms
+ option dontlognull
+ retries 3
+ option redispatch
 
 frontend rotor
  bind 192.168.33.33:33128
@@ -23,16 +26,4 @@ listen stats 192.168.33.33:38080
 backend tors
  option http_proxy
  server CH01 localhost:33004
- server CH02 localhost:33008
- server CH03 localhost:33012
- server CH04 localhost:33016
- server CH05 localhost:33020
- server CH06 localhost:33024
- server CH07 localhost:33028
- server CH08 localhost:33032
- server CH09 localhost:33036
- server CH10 localhost:33040
- server CH11 localhost:33044
- server CH12 localhost:33048
- server CH13 localhost:33052
  balance roundrobin

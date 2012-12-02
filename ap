@@ -2,8 +2,16 @@
 
 # https://exain.wordpress.com/2011/03/31/making-a-wifi-hotspot-access-point-using-linux-wifi-lan-cardusb-adapter/
 
-_conf=ap.conf.$$
+conf=ap.conf.$$
 hostapd=$HOME/bin/hostapd
+
+function ap/exit() {
+  if test -r "${conf}" ; then
+    rm ${conf}
+  fi
+  exit 1
+}
+trap ap/exit EXIT
 
 function ap/genpw() {
   local l=${1:-21}
@@ -12,19 +20,25 @@ function ap/genpw() {
 }
 
 function ap/config() {
-  cat > ${_conf} <<EOF
+  cat > ${conf} <<EOF
 interface=${1:-${inb}}
 driver=nl80211
 ssid=${essid}
 hw_mode=g
-channel=11
-wpa=3
+channel=6
+macaddr_acl=0
+ignore_broadcast_ssid=0
+auth_algs=1
+wpa=1
 wpa_passphrase=${passw}
 wpa_key_mgmt=WPA-PSK
-wpa_pairwise=TKIP CCMP
+wpa_pairwise=TKIP
+rsn_pairwise=CCMP
 wpa_ptk_rekey=600
 EOF
 }
+
+
 
 function ap/ipmasq() {
   # ! interface
@@ -34,9 +48,9 @@ function ap/ipmasq() {
 
 
 ### args
-_cmd=${1:-start}
-_wif=${2:-wlan1}
-essid=${3}
+# _cmd=${1:-start}
+_wif=${1:-wlan1}
+passw=${2:-$(ap/genpw)}
 
 ### main
 if test -z "${essid}" ; then
@@ -44,8 +58,6 @@ if test -z "${essid}" ; then
 else
   echo "ESSID: ${essid}"
 fi
-# read -s -p "     > " passw
-passw=$(ap/genpw)
 echo "     > $passw"
 read
 
@@ -58,6 +70,4 @@ sudo ifconfig ${_wif} 10.1.1.1 netmask 255.255.255.0
 ap/config ${_wif}
 echo ""
 echo ""
-sudo ${hostapd} -dd ${_conf}
-
-rm ${_conf}
+sudo ${hostapd} -t -dd ${conf}

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+chan="CH01"
+ext=".ext"
+# shift
+
+
+echo "${1}" | grep "CH??" &>/dev/null
+if test $? -eq 0 ; then
+  chan=${1}
+  shift
+fi
+
+cmd=${*}
+case "${1:-me}" in
+  me)
+    cmd="curl http://ifconfig.me/all"
+    echo "${cmd}"
+  ;;
+esac
+
+conf="${chan}/torsocks${ext}"
+if ! test -r "${conf}" ; then 
+  exit 1
+fi
+
+read -p "Run command: ${cmd}?"
+TORSOCKS_CONF_FILE="${conf}" torsocks ${cmd}

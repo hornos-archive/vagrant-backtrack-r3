@@ -1,0 +1,18 @@
+#!/bin/bash
+
+trap tor/exit EXIT
+function tor/exit() {
+  ./tree stop
+  sleep 3
+  ./tree clean
+  exit 1
+}
+
+chan=${1:-1}
+read -p "Start ${chan} TOR channels?"
+
+./tree init ${chan}
+sleep 1
+./tree start
+sleep 1
+./tree haproxy

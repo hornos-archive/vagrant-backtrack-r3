@@ -1,6 +1,6 @@
 #!/bin/bash
 
-v/iwlist | \
+v/iwlist $* | \
 awk '{
   if(match($0,"Cell") ) {
     split($0,a," ");

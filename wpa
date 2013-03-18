@@ -8,7 +8,8 @@ _wdrv=wext
 _wif=wlan0
 
 function wpa/connect() {
-  v/wifup
+  _wif=$1
+  v/wifup ${_wif}
   sleep 1
   bssid=""
 
@@ -16,7 +17,7 @@ function wpa/connect() {
     echo ""
     echo "Scanning..."
     # v/scan
-    v/cells
+    v/cells ${_wif}
     echo ""
     read    -p "ESSID: " bssid
     if test "${bssid}" = "" ; then
@@ -35,17 +36,18 @@ function wpa/connect() {
 }
 
 function wpa/dhcp() {
-  sudo dhclient ${_wif}
-  ifconfig ${_wif}
+  local _if=${1:-${_wif}}
+  sudo dhclient ${_if}
+  ifconfig ${_if}
   route -n
 }
 
 _cmd=$1
-shift
 
 case ${_cmd} in
   dhcp)
-    wpa/dhcp
+    shift
+    wpa/dhcp $*
   ;;
   me)
     curl -s ifconfig.me/all.json | \

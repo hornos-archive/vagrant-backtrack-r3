@@ -26,6 +26,7 @@ Vagrant::Config.run do |config|
   # network using the host's network device. This makes the VM appear as another
   # physical device on your network.
   config.vm.network :hostonly, "192.168.33.33"
+  config.vm.network :bridged, :bridge => "en0: Wi-Fi (AirPort)"
   # config.vm.network :bridged
  
 
